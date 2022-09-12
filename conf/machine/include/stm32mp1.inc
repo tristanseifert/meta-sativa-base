@@ -58,5 +58,5 @@ IMAGE_INSTALL:append = " \
 "
 
 ##### Sativa tools/daemons
-IMAGE_INSTALL:append = " sativa-systemd-watchdog sativa-root-overlays"
-IMAGE_INSTALL:append = " sativa-confd"
+# Read-only rootfs, with overlays for writeable areas
+IMAGE_INSTALL:append = " sativa-root-overlays"

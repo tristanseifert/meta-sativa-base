@@ -7,6 +7,8 @@ KERNEL_VERSION_SANITY_SKIP="1"
 BRANCH = "linux-5.15.y"
 
 SRCREV = "${AUTOREV}"
+
+# fetch from kernel git repo, and apply some basic config
 SRC_URI = " \
     git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git;branch=${BRANCH} \
     file://filesystems.cfg \
@@ -14,9 +16,7 @@ SRC_URI = " \
     file://base.cfg \
 "
 
-# custom device trees
-
-# resource manager driver
+# resource manager driver (for STM32MP15x)
 SRC_URI += " \
     file://git/drivers/remoteproc/rproc_srm_dev.c \
     file://git/drivers/remoteproc/rproc_srm_core.h \
