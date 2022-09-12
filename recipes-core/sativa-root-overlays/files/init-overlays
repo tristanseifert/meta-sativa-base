@@ -62,34 +62,18 @@ init_userdata_format()
     # mount it and create the initial folder structure
     mount_userdata
 
-    # TODO: add external hooks here (check for shell scripts to execute)
     /bin/mkdir -p /persistent/overlay/etc
     /bin/mkdir -p /persistent/overlay/.etc-work
     /bin/mkdir -p /persistent/overlay/usr/etc
     /bin/mkdir -p /persistent/overlay/.usr-etc-work
     /bin/mkdir -p /persistent/overlay/home
     /bin/mkdir -p /persistent/overlay/.home-work
-    /bin/mkdir -p /persistent/appdata/control
-    /bin/mkdir -p /persistent/appdata/remote
-    /bin/mkdir -p /persistent/appdata/ui
-    /bin/mkdir -p /persistent/config
-    /bin/mkdir -p /persistent/logs
-    /bin/mkdir -p /persistent/logs/system
-    /bin/mkdir -p /persistent/overlay/.var-log-work
 
-    # apply permissions
-    /bin/chown -R load-fw /persistent/appdata/control
-    /bin/chown -R load-remote /persistent/appdata/remote
-    /bin/chown -R load-ui /persistent/appdata/ui
-
-    # for confd
-    /bin/mkdir -p /persistent/config/confd-data/
-    /bin/chown -R confd:load /persistent/config/confd-data
-    /bin/chmod -R 700 /persistent/config/confd-data
-
-    # global permissions
-    /bin/chgrp -R load /persistent/appdata
-    /bin/chgrp -R load /persistent/config
+    # execute scripts from the application to create directories
+    if [ -e /usr/sbin/init-overlays-format-hook ]
+    then
+        /usr/sbin/init-overlays-format-hook
+    fi
 
     # when done, unmount to force to sync to disk
     /bin/umount /persistent

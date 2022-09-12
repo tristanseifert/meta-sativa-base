@@ -56,7 +56,3 @@ IMAGE_INSTALL:append = " libubootenv libubootenv-bin "
 IMAGE_INSTALL:append = " \
     libsocketcan \
 "
-
-##### Sativa tools/daemons
-# Read-only rootfs, with overlays for writeable areas
-IMAGE_INSTALL:append = " sativa-root-overlays"
