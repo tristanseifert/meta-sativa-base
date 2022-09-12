@@ -1,10 +1,8 @@
-# Programmable load base layer
-The lowest level Yocto layer for the programmable load system image.
-
-This provides stuff like device trees, hardware definitions, and bootloaders, as well as machine definitions.
+# Sativa distribution layer
+A Yocto layer to provide a basic Linux distribution for embedded platforms. It contains some common platform support stuff here.
 
 ## Dependencies
-Other layers required to build the programmable load are:
+Other layers required to build the system are:
 
 - meta-openembedded: specifically, meta-oe and meta-filesystems
 - meta-openamp
@@ -15,7 +13,8 @@ Other layers required to build the programmable load are:
 First, select the distro `sativa` in your build configuration; then configure your `build/conf/local.conf` to use one of the following machines:
 
 - stm32mp157a-dk1: STM32MP1 development board
-- load-rev3: Form factor hardware, rev3 pcb
+
+You may specify custom machines based on the hardware supported here.
 
 Additionally, you may wish to enable additional image features for debugging:
 

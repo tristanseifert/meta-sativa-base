@@ -62,6 +62,7 @@ init_userdata_format()
     # mount it and create the initial folder structure
     mount_userdata
 
+    # TODO: add external hooks here (check for shell scripts to execute)
     /bin/mkdir -p /persistent/overlay/etc
     /bin/mkdir -p /persistent/overlay/.etc-work
     /bin/mkdir -p /persistent/overlay/usr/etc

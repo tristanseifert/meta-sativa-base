@@ -9,13 +9,9 @@ BRANCH = "linux-5.15.y"
 SRCREV = "${AUTOREV}"
 SRC_URI = " \
     git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git;branch=${BRANCH} \
-    file://0001-add-spidev-compatible.patch \
-    file://0002-add-custom-lcd-panel.patch \
     file://filesystems.cfg \
     file://less-drivers.cfg \
     file://base.cfg \
-    file://stm32mp1.cfg \
-    file://programmable-load-rev3.cfg \
 "
 
 # custom device trees

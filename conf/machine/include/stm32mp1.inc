@@ -38,11 +38,6 @@ WKS_FILE ?= "stm32mp1-sdcard.wks"
 # log files get persisted to data partition
 VOLATILE_LOG_DIR = "false"
 
-# servers
-IMAGE_INSTALL:append = " \
-    lighttpd \
-"
-
 # tools
 IMAGE_INSTALL:append = " \
     curl u-boot-env \
@@ -62,20 +57,6 @@ IMAGE_INSTALL:append = " \
     libsocketcan \
 "
 
-# UI libraries
-# boot-splash: Custom bootup splash screen
-# qrencode: rendering of qr codes
-IMAGE_INSTALL:append = " \
-    boot-splash \
-    qrencode \
-"
-
-##### custom programmable load stuff
-# root fs overlays (for app data)
-IMAGE_INSTALL:append = " pl-root-overlays pl-app-meta"
-# general programmable load firmware stuff
-IMAGE_INSTALL:append = " pl-confd pl-loadd"
-# real-time control firmware
-
-# user interface and remote
-IMAGE_INSTALL:append = " pl-pinballd pl-gui"
+##### Sativa tools/daemons
+IMAGE_INSTALL:append = " sativa-systemd-watchdog sativa-root-overlays"
+IMAGE_INSTALL:append = " sativa-confd"
