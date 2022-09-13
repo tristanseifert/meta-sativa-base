@@ -40,7 +40,7 @@ FILES:${PN} += "/usr/etc/confd.toml"
 
 do_install:append() {
     install -d ${D}/usr/etc
-    install -m 0644 ${WORKDIR}/data/confd.toml ${D}/usr/etc
+    install -o confd -m 0644 ${WORKDIR}/data/confd.toml ${D}/usr/etc
 }
 
 # create users

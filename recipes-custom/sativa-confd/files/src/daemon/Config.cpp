@@ -3,7 +3,9 @@
 #include <pwd.h>
 
 #include <cerrno>
+#include <filesystem>
 #include <stdexcept>
+#include <unordered_set>
 
 #include <fmt/core.h>
 #include <plog/Log.h>
@@ -19,33 +21,73 @@ std::vector<Config::AccessDescriptor> Config::gAllowList;
  * @brief Parse configuration file
  *
  * Read the TOML-encoded configuration file at the specified path.
+ *
+ * @param isRoot Whether this is the root config file, or one that was included
  */
-void Config::Read(const std::filesystem::path &path) {
+void Config::Read(const std::filesystem::path &path, const bool isRoot) {
+    static std::unordered_set<std::string> gOpenedFiles;
+
+    // ensure file hasn't been read before (to avoid loops) before parsing it
+    const auto &nativePath = path.native();
+    if(gOpenedFiles.contains(nativePath)) {
+        throw std::runtime_error(fmt::format("recursion detected (I already parsed '{}'!)",
+                    nativePath));
+    }
+    gOpenedFiles.emplace(nativePath);
+
     const auto tbl = toml::parse_file(path.native());
 
-    // RPC settings
+    // RPC settings (mandatory in root)
     const auto rpc = tbl["rpc"];
-    if(!rpc || !rpc.is_table()) {
-        throw std::runtime_error("invalid `rpc` key");
+    if(rpc) {
+        if(!rpc.is_table()) {
+            throw std::runtime_error("invalid `rpc` key");
+        }
+
+        ReadRpc(*rpc.as_table());
+    } else if(isRoot) {
+        throw std::runtime_error("missing `rpc` key");
     }
 
-    ReadRpc(*rpc.as_table());
-
-    // data store settings
+    // data store settings (mandatory in root)
     const auto storage = tbl["storage"];
-    if(!storage || !storage.is_table()) {
-        throw std::runtime_error("invalid `storage` key");
+    if(storage) {
+        if(!storage.is_table()) {
+            throw std::runtime_error("invalid `storage` key");
+        }
+
+        ReadStorage(*storage.as_table());
+    } else if(isRoot) {
+        throw std::runtime_error("missing `storage` key");
     }
 
-    ReadStorage(*storage.as_table());
-
-    // access control
+    // access control (optional in root)
     const auto access = tbl["access"];
-    if(!access || !access.is_table()) {
-        throw std::runtime_error("invalid `access` key");
+    if(access) {
+        if(!access.is_table()) {
+            throw std::runtime_error("invalid `access` key");
+        }
+
+        ReadAccess(*access.as_table());
     }
 
-    ReadAccess(*access.as_table());
+
+    // additional include files
+    const auto includes = tbl["include"];
+    if(includes) {
+        if(!includes.is_array_of_tables()) {
+            throw std::runtime_error("invalid `include` directives (expected array of tables)");
+        }
+
+        const auto &arr = *includes.as_array();
+        for(const auto &directive : arr) {
+            if(!directive.is_table()) {
+                throw std::logic_error("unexpected `include` directive type");
+            }
+
+            ReadInclude(*directive.as_table());
+        }
+    }
 }
 
 /**
@@ -93,6 +135,7 @@ void Config::ReadStorage(const toml::table &tbl) {
  */
 void Config::ReadAccess(const toml::table &tbl) {
     // default mode
+    // TODO: read it
 
     // allowed accesses
     const auto accesses = tbl["allow"];
@@ -196,4 +239,67 @@ void Config::ReadAccessAllow(const toml::table &tbl) {
 
     // store it in allow list
     gAllowList.emplace_back(std::move(desc));
+}
+
+
+
+/**
+ * @brief Process an include directive
+ *
+ * Include directives can be used to reference another configuration file (or directory containing
+ * files) by path name. Those files are opened and parsed the same as the main configuration
+ * file.
+ *
+ * The following keys can be specified in an `include` section:
+ *
+ * - `path`: String to a filename or directory containing files to read. If a directory is
+ *           specified, all files with the `.toml` extension will be opened and parsed.
+ */
+void Config::ReadInclude(const toml::table &tbl) {
+    // get the path
+    const std::string pathStr = tbl["path"].value_or("");
+    if(pathStr.empty()) {
+        throw std::runtime_error("invalid empty include path");
+    }
+
+    std::filesystem::path path(pathStr);
+
+    // first, ensure it exists
+    if(!std::filesystem::exists(path)) {
+        throw std::runtime_error(fmt::format("include path '{}' does not exist", path.native()));
+    }
+
+    // then either recurse into the directory or open the file as-is
+    if(std::filesystem::is_directory(path)) {
+        ProcessIncludeDirectory(path);
+    } else {
+        PLOG_VERBOSE << "including config file: " << path;
+        Read(path, false);
+    }
+}
+
+/**
+ * @brief Load all config files in the given directory
+ *
+ * Find all configuration files (those ending with `.toml` extension) in the specified directory
+ * and read them.
+ *
+ * @param path Directory to scan for config files
+ */
+void Config::ProcessIncludeDirectory(const std::filesystem::path &path) {
+    for(auto const &dent : std::filesystem::directory_iterator{path}) {
+        // skip files that haven't got the appropriate extension
+        if(!dent.is_regular_file()) {
+            continue;
+        }
+
+        const auto &dentPath = dent.path();
+        if(dentPath.extension() != ".toml") {
+            continue;
+        }
+
+        // process the file as normal
+        PLOG_VERBOSE << "including config file: " << dentPath;
+        Read(dentPath, false);
+    }
 }

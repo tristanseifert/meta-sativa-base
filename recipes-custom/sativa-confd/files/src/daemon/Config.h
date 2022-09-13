@@ -37,7 +37,7 @@ class Config {
         };
 
     public:
-        static void Read(const std::filesystem::path &path);
+        static void Read(const std::filesystem::path &path, const bool isRoot = true);
 
         /// Get the path for the RPC listening socket
         static const auto &GetRpcSocketPath() {
@@ -53,6 +53,9 @@ class Config {
         static void ReadStorage(const toml::table &);
         static void ReadAccess(const toml::table &);
         static void ReadAccessAllow(const toml::table &);
+
+        static void ReadInclude(const toml::table &);
+        static void ProcessIncludeDirectory(const std::filesystem::path &);
 
     private:
         /// Path to the UNIX domain socket used for RPC

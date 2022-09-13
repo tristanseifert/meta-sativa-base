@@ -6,28 +6,10 @@ listen = "/var/run/confd/rpc.sock"
 dir = "/persistent/config/confd-data"
 db = "storage.db"
 
+# by default, deny accesses to all keys
 [access]
 default = "deny"
 
-# embedded controller arbiter
-[[access.allow]]
-user = "loadd"
-paths = [
-    "fw.*"
-]
-
-# USB and network remote control process
-[[access.allow]]
-user = "load-remote"
-paths = [
-    "remote.*"
-]
-
-# user interface process
-[[access.allow]]
-user = "load-ui"
-paths = [
-    "ui.*",
-    "remote.settings.*",
-    "auth.settings.*",
-]
+# include additional configuration files (from application)
+[[include]]
+path = "/usr/etc/confd.d/"
