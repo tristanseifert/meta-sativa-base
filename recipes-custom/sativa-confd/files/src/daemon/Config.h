@@ -2,6 +2,7 @@
 #define CONFIG_H
 
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <filesystem>
 #include <optional>
@@ -43,6 +44,11 @@ class Config {
         static const auto &GetRpcSocketPath() {
             return gSocketPath;
         }
+        /// Get the permission mask to apply to the RPC listening socket
+        static const auto GetRpcSocketPermissions() {
+            return gSocketMode;
+        }
+
         /// Get the path of the storage database
         static const auto &GetStoragePath() {
             return gStoragePath;
@@ -60,6 +66,9 @@ class Config {
     private:
         /// Path to the UNIX domain socket used for RPC
         static std::filesystem::path gSocketPath;
+        /// Permissions to apply to the domain socket (if any)
+        static mode_t gSocketMode;
+
         /// Path of the database file
         static std::filesystem::path gStoragePath;
         /// Allowed access list

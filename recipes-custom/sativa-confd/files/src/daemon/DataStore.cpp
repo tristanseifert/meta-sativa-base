@@ -393,7 +393,7 @@ void DataStore::insertKey(const std::string_view &keyName, const PropertyValue &
     SQLite::Statement infoStmt(*this->db, "INSERT INTO PropertyKeys (key, valueType) "
             "VALUES (:key, :type);");
     infoStmt.bind(":key", keyName.data());
-    infoStmt.bind(":type", static_cast<uintptr_t>(type));
+    infoStmt.bind(":type", static_cast<long>(type));
 
     err = infoStmt.exec();
     if(!err) {

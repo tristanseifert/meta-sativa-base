@@ -2,8 +2,8 @@ SUMMARY = "Config daemon"
 LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/ISC;md5=f3b90e78ea0cffb20bf5cca7947a896d"
 PR = "r0"
-DEPENDS = "sqlite3 libcbor systemd git libevent fmt plog"
-RDEPENDS:${PN} = "libsystemd"
+DEPENDS = "libcbor systemd git libevent fmt plog sqlitecpp"
+RDEPENDS:${PN} = "libsystemd sqlite3"
 
 # define the CMake source directories
 SRC_URI = "\

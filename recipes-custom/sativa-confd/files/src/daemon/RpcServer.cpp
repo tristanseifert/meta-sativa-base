@@ -75,9 +75,14 @@ void RpcServer::initSocket() {
     }
 
     // set the permission of the socket to allow all to connect
-    err = fchmod(this->listenSock, 0777);
-    if(err == -1) {
-        throw std::system_error(errno, std::generic_category(), "set rpc socket permissions");
+    auto mode = Config::GetRpcSocketPermissions();
+
+    if(mode) {
+        err = fchmod(this->listenSock, mode);
+        if(err == -1) {
+            throw std::system_error(errno, std::generic_category(),
+                    fmt::format("set rpc socket permissions ({:o})", mode));
+        }
     }
 
     // allow clients to connect

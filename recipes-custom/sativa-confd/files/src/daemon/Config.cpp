@@ -14,6 +14,8 @@
 #include "Config.h"
 
 std::filesystem::path Config::gSocketPath;
+mode_t Config::gSocketMode{S_IRWXU | S_IRWXG | S_IRWXO};
+
 std::filesystem::path Config::gStoragePath;
 std::vector<Config::AccessDescriptor> Config::gAllowList;
 
@@ -102,6 +104,12 @@ void Config::ReadRpc(const toml::table &tbl) {
     }
 
     gSocketPath = path;
+
+    // access mode, if specified
+    const auto mode = tbl["umode"].value_or(-1);
+    if(mode >= 0) {
+        gSocketMode = mode & (S_IRWXU | S_IRWXG | S_IRWXO);
+    }
 }
 
 /**

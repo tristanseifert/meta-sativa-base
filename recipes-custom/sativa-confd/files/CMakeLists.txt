@@ -12,6 +12,10 @@ include(ExternalProject)
 include(FetchContent)
 
 ###############
+# Set to fetch dependencies from online
+option(FETCH_DEPENDENCIES "Fetch dependencies automatically" OFF)
+
+###############
 # Set warning levels and language version
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -37,17 +41,43 @@ link_directories(${PKG_LIBCBOR_LIBRARY_DIRS})
 pkg_search_module(PKG_LIBEVENT REQUIRED libevent)
 link_directories(${PKG_LIBEVENT_LIBRARY_DIRS})
 
-find_package(fmt REQUIRED)
-find_package(plog REQUIRED)
+# additional (mostly C++ libraries) as dependencies
+if(${FETCH_DEPENDENCIES})
+    FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY  https://github.com/fmtlib/fmt.git
+        # 9.1.0
+        GIT_TAG         a33701196adfad74917046096bf5a2aa0ab0bb50
+    )
+    FetchContent_Declare(
+        plog
+        GIT_REPOSITORY  https://github.com/SergiusTheBest/plog.git
+        # 1.1.8
+        GIT_TAG         89ac49396ae6978a056034d1e34bb170bfd3de33
+    )
+    FetchContent_Declare(
+        tomlplusplus
+        GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+        GIT_TAG        v3.2.0
+    )
+    FetchContent_Declare(
+        SQLiteCpp
+        GIT_REPOSITORY  https://github.com/SRombauts/SQLiteCpp.git
+        GIT_TAG        3.1.1
+    )
 
-# Remote dependencies
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/lib/tomlplusplus EXCLUDE_FROM_ALL)
+    # option(SQLITECPP_INTERNAL_SQLITE "Add the internal SQLite3 source to the project." ON CACHE)
+    set(SQLITECPP_INTERNAL_SQLITE OFF CACHE BOOL "")
+    set(SQLITE_OMIT_LOAD_EXTENSION ON CACHE BOOL "")
+    add_compile_options(-DSQLITE_OMIT_LOAD_EXTENSION) # this _should_ be enabled by the above ^
 
-# option(SQLITECPP_INTERNAL_SQLITE "Add the internal SQLite3 source to the project." ON CACHE)
-set(SQLITECPP_INTERNAL_SQLITE OFF CACHE BOOL "")
-set(SQLITE_OMIT_LOAD_EXTENSION ON CACHE BOOL "")
-add_compile_options(-DSQLITE_OMIT_LOAD_EXTENSION) # this _should_ be enabled by the above ^
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/lib/SQLiteCpp EXCLUDE_FROM_ALL)
+    FetchContent_MakeAvailable(fmt plog tomlplusplus SQLiteCpp)
+else()
+    find_package(fmt REQUIRED)
+    find_package(plog REQUIRED)
+    find_package(tomlplusplus REQUIRED)
+    find_package(SQLiteCpp REQUIRED)
+endif()
 
 ###############
 # Create version file
