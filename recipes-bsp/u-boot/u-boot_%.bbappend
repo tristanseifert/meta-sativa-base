@@ -19,3 +19,11 @@ SRC_URI:append:stm32mp1 = " \
     file://git/arch/arm/dts/stm32mp15-m4-srm.dtsi \
     file://git/include/dt-bindings/pinctrl/stm32-pinfunc-2.h \
 "
+
+# remove some CVE patches from upstream (they conflict with newer u-boot)
+SRC_URI:remove = "\
+    file://0001-i2c-fix-stack-buffer-overflow-vulnerability-in-i2c-m.patch\
+    file://0001-fs-squashfs-sqfs_read-Prevent-arbitrary-code-executi.patch\
+    file://0001-net-Check-for-the-minimum-IP-fragmented-datagram-siz.patch\
+    file://0001-fs-squashfs-Use-kcalloc-when-relevant.patch\
+"
