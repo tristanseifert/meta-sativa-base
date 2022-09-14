@@ -12,4 +12,6 @@ SRC_URI = "git://github.com/SRombauts/SQLiteCpp.git;protocol=https;branch=${SRCB
 
 S = "${WORKDIR}/git"
 
+EXTRA_OECMAKE += "-DSQLITECPP_INTERNAL_SQLITE=OFF -DSQLITE_OMIT_LOAD_EXTENSION=ON"
+
 inherit pkgconfig cmake
