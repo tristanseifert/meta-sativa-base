@@ -9,12 +9,16 @@ S = "${WORKDIR}"
 
 # copy the shell script
 do_install() {
-	# script
-	install -d ${D}${sbindir}
-	install -m 0755 ${S}/init-overlays ${D}/${sbindir}
-	
-	# overlay mount points
-	install -d ${D}/persistent
+    # script
+    install -d ${D}${sbindir}
+    install -m 0755 ${S}/init-overlays ${D}/${sbindir}
+
+    # directory for hooks
+    install -d ${D}${sbindir}/init-overlays.d
+    install -d ${D}${sbindir}/init-overlays.d/format-hooks
+
+    # overlay mount points
+    install -d ${D}/persistent
 }
 
 # export that we created the data fs mountpoints

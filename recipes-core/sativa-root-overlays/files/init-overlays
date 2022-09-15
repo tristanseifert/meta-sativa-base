@@ -70,9 +70,11 @@ init_userdata_format()
     /bin/mkdir -p /persistent/overlay/.home-work
 
     # execute scripts from the application to create directories
-    if [ -e /usr/sbin/init-overlays-format-hook ]
+    if [ -d /usr/sbin/init-overlays.d/format-hooks ]
     then
-        /usr/sbin/init-overlays-format-hook
+        for f in /usr/sbin/init-overlays.d/format-hooks/*.sh; do
+            sh $f
+        done
     fi
 
     # when done, unmount to force to sync to disk
