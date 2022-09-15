@@ -1,3 +1,5 @@
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+
 # FFI (C/C++ compat) implementation
 DEPENDS += "libffi"
 EXTRA_OECONF += "--with-ffi"
@@ -21,3 +23,13 @@ pkg_postinst:php-native() {
     wget https://curl.haxx.se/ca/cacert.pem -O cacert.pem
     echo "openssl.cafile=\"$(pwd)/cacert.pem\""
 }
+
+# install php.ini
+SRC_URI += "file://php.ini"
+
+do_install:append() {
+    install -d ${D}${sysconfdir}/php/apache2-php8
+    install -m 0644 ${WORKDIR}/php.ini ${D}${sysconfdir}/php/apache2-php8
+}
+
+FILES:${PN} += "${sysconfdir}/php"
