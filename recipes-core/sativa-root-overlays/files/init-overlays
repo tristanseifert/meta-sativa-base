@@ -6,16 +6,16 @@ set -e
 # NOTE: we cannot use the by-partlabel or friends, since udev isn't started yet
 
 # device to partition
-DEVICE=/dev/mmcblk0
+DEVICE=/dev/mmcblk1
 # root fs partition
 #ROOTPART=/dev/disk/by-partlabel/rootfs
-ROOTPART=/dev/mmcblk0p5
+ROOTPART=/dev/mmcblk1p5
 # user fs partition (raw)
 #USERPART_RAW=/dev/disk/by-partlabel/userdata-raw
-USERPART_RAW=/dev/mmcblk0p8
+USERPART_RAW=/dev/mmcblk1p8
 # user fs partition (formatted)
 #USERPART=/dev/disk/by-partlabel/userdata
-USERPART=/dev/mmcblk0p8
+USERPART=/dev/mmcblk1p8
 # number of partitions, when completely partitioned
 NUM_DESIRED_PARTITIONS=8
 
@@ -57,24 +57,36 @@ init_userdata_part()
 init_userdata_format()
 {
     # initialize fs
-    /usr/sbin/mkfs.f2fs -f -l userdata -O extra_attr,inode_checksum,sb_checksum,compression $USERPART_RAW
+    echo "Formatting f2fs"
+
+    # do not use "secure discard" (cheapo eMMC may not support it)
+    /usr/sbin/mkfs.f2fs -f -l userdata -t 0 -O extra_attr,inode_checksum,sb_checksum,compression $USERPART_RAW
 
     # mount it and create the initial folder structure
     mount_userdata
 
+    # /etc overlay
     /bin/mkdir -p /persistent/overlay/etc
     /bin/mkdir -p /persistent/overlay/.etc-work
+
+    # /usr/etc overlay
     /bin/mkdir -p /persistent/overlay/usr/etc
     /bin/mkdir -p /persistent/overlay/.usr-etc-work
+
+    # home dir (overlay)
     /bin/mkdir -p /persistent/overlay/home
     /bin/mkdir -p /persistent/overlay/.home-work
 
+    # system logs (overlay)
+    /bin/mkdir -p /persistent/logs
+    /bin/mkdir -p /persistent/logs/system
+    /bin/mkdir -p /persistent/overlay/.var-log-work
+
     # execute scripts from the application to create directories
+    echo "Invoking post-format hooks"
     if [ -d /usr/sbin/init-overlays.d/format-hooks ]
     then
-        for f in /usr/sbin/init-overlays.d/format-hooks/*.sh; do
-            sh $f
-        done
+        find /usr/sbin/init-overlays.d/format-hooks -maxdepth 1 -type f -exec echo {} \; -exec sh {} \;
     fi
 
     # when done, unmount to force to sync to disk
@@ -98,7 +110,7 @@ else
     # check whether the partition was formatted
     HAS_RAW_USERDATA=$(/usr/sbin/sgdisk -p $DEVICE --script | /bin/grep userdata-raw | /usr/bin/wc -l)
     if [ $HAS_RAW_USERDATA -gt 0 ]; then
-        echo "Formatting data partition"
+        echo "Formatting and initializing data partition"
         init_userdata_format
     fi
 fi

@@ -8,13 +8,13 @@ WatchdogSec=10
 Restart=on-failure
 RestartSec=5
 User=confd
-Group=load
+Group=daemon
 PrivateTmp=true
 
 # create the socket directory (as root)
 PermissionsStartOnly=true
 ExecStartPre=-/bin/mkdir /var/run/confd
-ExecStartPre=/bin/chown -R confd:load /var/run/confd/
+ExecStartPre=/bin/chown -R confd:daemon /var/run/confd/
 ExecStartPre=/bin/chmod -R 0775 /var/run/confd/
 
 [Install]

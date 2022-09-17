@@ -35,11 +35,14 @@ do_install:append() {
 
 # install configuration files
 SRC_URI:append = " file://data/confd.toml "
-FILES:${PN} += "/usr/etc/confd.toml"
+FILES:${PN} += "/usr/etc/confd.toml /usr/etc/confd.d/ "
 
 do_install:append() {
     install -d ${D}/usr/etc
     install -o confd -m 0644 ${WORKDIR}/data/confd.toml ${D}/usr/etc
+
+    # template directory for bonus config files
+    install -d ${D}/usr/etc/confd.d/
 }
 
 # create users
@@ -47,3 +50,12 @@ inherit useradd
 USERADD_PACKAGES = "${PN}"
 
 USERADD_PARAM:${PN} = "-u 5000 -d /persistent/config/confd-data -s /bin/false -g daemon confd"
+
+# install the post-format script
+SRC_URI:append = "file://data/01-init-confd.sh"
+FILES:${PN} += "${sbindir}/init-overlays.d/format-hooks/01-init-confd.sh"
+
+do_install:append () {
+    install -d ${D}${sbindir}/init-overlays.d/format-hooks
+    install -m 0744 ${WORKDIR}/data/01-init-confd.sh ${D}/${sbindir}/init-overlays.d/format-hooks
+}
