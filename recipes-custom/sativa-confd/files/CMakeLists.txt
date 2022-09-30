@@ -134,6 +134,8 @@ add_library(libconfd SHARED
     src/lib/RpcConnection.cpp
     src/lib/wrapper/connection.cpp
     src/lib/wrapper/query.cpp
+    src/lib/wrapper/update.cpp
+    src/lib/wrapper/delete.cpp
     ${VERSION_FILE}
 )
 set_target_properties(libconfd PROPERTIES OUTPUT_NAME confd)
@@ -159,6 +161,6 @@ add_executable(util
 )
 target_include_directories(util PRIVATE include)
 set_target_properties(util PROPERTIES OUTPUT_NAME confdutil)
-target_link_libraries(util PRIVATE libconfd)
+target_link_libraries(util PRIVATE libconfd fmt::fmt)
 
 INSTALL(TARGETS util RUNTIME DESTINATION /usr/bin)
