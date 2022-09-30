@@ -10,7 +10,6 @@
 #include <optional>
 #include <span>
 #include <stdexcept>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -51,35 +50,7 @@ static void EnsureSuccess(const int err, const bool ignoreNull = false) {
         return;
     }
     else if(err != kConfdStatusSuccess) {
-        std::stringstream str;
-        str << "confd error: " << err;
-
-        // get a pretty string describing the error code
-        switch(err) {
-            case kConfdNotFound:
-                str << " (key not found)";
-                break;
-            case kConfdTypeMismatch:
-                str << " (type mismatch)";
-                break;
-            case kConfdAccessDenied:
-                str << " (access denied)";
-                break;
-            case kConfdNotSupported:
-                str << " (not supported)";
-                break;
-            case kConfdInvalidResponse:
-                str << " (invalid response)";
-                break;
-            case kConfdNoMemory:
-                str << " (insufficient memory)";
-                break;
-            case kConfdInvalidArguments:
-                str << " (invalid arguments)";
-                break;
-        }
-
-        throw std::runtime_error(str.str());
+        throw std::runtime_error(fmt::format("confd error: {} ({})", confd_strerror(err), err));
     }
 }
 

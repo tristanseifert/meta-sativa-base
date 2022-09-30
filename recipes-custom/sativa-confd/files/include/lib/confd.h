@@ -49,6 +49,18 @@ enum confd_status {
  */
 const char *confd_version_string();
 
+/**
+ * @brief Convert a confd error to the associated text representation
+ *
+ * @param error An error code returned from a confd routine
+ *
+ * @return String corresponding to the error message, or NULL if unknown
+ *
+ * @remark The returned string is part of a static data area of the library. Do not modify or
+ *         attempt to free it.
+ */
+const char *confd_strerror(int error);
+
 
 
 /**

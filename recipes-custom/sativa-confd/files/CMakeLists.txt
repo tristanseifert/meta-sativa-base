@@ -136,6 +136,7 @@ add_library(libconfd SHARED
     src/lib/wrapper/query.cpp
     src/lib/wrapper/update.cpp
     src/lib/wrapper/delete.cpp
+    src/lib/wrapper/misc.cpp
     ${VERSION_FILE}
 )
 set_target_properties(libconfd PROPERTIES OUTPUT_NAME confd)
